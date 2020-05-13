@@ -55,7 +55,7 @@ ${stat.confirmed}
 ${stat.recovered}
 ${stat.deaths}
 
-Введите название нужного региона. Из-за ограничений мессенджера, название необходимо вводить вручную и полностью. Например: Московская область
+Введи название нужного региона. Из-за ограничений мессенджера, название необходимо вводить вручную и полностью. Например: Московская область
             `
 
             const buttonAbout = new ICQ.Button("О боте", `{"name": "about"}`)
@@ -97,11 +97,10 @@ ${stat.confirmed}
 ${stat.recovered}
 ${stat.deaths}
 
-Введите название нужного региона. Из-за ограничений мессенджера, название необходимо вводить вручную и полностью. Например: Московская область
+Введи название нужного региона. Из-за ограничений мессенджера, название необходимо вводить вручную и полностью. Например: Московская область
             `
 
             const buttonAbout = new ICQ.Button("О боте", `{"name": "about"}`)
-            console.log(event)
 
             bot.sendText(event.data.message.chat.chatId, startMessage, null, null, null, [buttonAbout])
 
@@ -130,15 +129,15 @@ const sendRegionMessage = (region, bot, event) => {
             const $ = cheerio.load(response.data)
             $('#russia_stats .flex-table:not(.header)').each((i, elem) => {
                 data.push({
-                    region: $(elem).find('div:nth-child(1)').text(),
-                    confirmed: $(elem).find('div:nth-child(2)').text(),
-                    deaths: $(elem).find('div:nth-child(3)').text(),
-                    recovered: $(elem).find('div:nth-child(4)').text()
+                    region: $(elem).find('div:nth-child(1)').text() === '-' ? '0' : $(elem).find('div:nth-child(1)').text(),
+                    confirmed: $(elem).find('div:nth-child(2)').text() === '-' ? '0' : $(elem).find('div:nth-child(2)').text(),
+                    deaths: $(elem).find('div:nth-child(3)').text() === '-' ? '0' : $(elem).find('div:nth-child(3)').text(),
+                    recovered: $(elem).find('div:nth-child(4)').text() === '-' ? '0' : $(elem).find('div:nth-child(4)').text(),
                 })
             })
             
             data.forEach(item => {
-                if(item.region.toLowerCase() === region.toLowerCase()) {
+                if(item.region.toLowerCase().replace(/\s+/g, '').trim() === region.toLowerCase().replace(/\s+/g, '').trim()) {
                     const stat = {}
 
                     const [confirmed, confirmedPlus] = item.confirmed.match(/([\d ]+)/g);
@@ -148,7 +147,7 @@ const sendRegionMessage = (region, bot, event) => {
                     stat.recovered = `Вылечено: ${recovered} +(${recoveredPlus === undefined ? '0' : recoveredPlus})`
 
                     const [deaths, deathsPlus] = item.deaths.match(/([\d ]+)/g);
-                    stat.deaths = `Погибло: ${deaths} +(${deathsPlus === undefined ? '+0' : deathsPlus})`
+                    stat.deaths = `Погибло: ${deaths} (${deathsPlus === undefined ? '0' : deathsPlus})`
 
                     const startMessage = `
 Статистика по региону ${item.region}:
@@ -157,7 +156,7 @@ ${stat.confirmed}
 ${stat.recovered}
 ${stat.deaths}
 
-Введи название другого региона или нажми на кнопку чтобы венуться в меню
+Введи название другого региона или нажми на кнопку чтобы вернуться в меню
 `
 
                     const buttonAbout = new ICQ.Button("Вернуться", `{"name": "back"}`)
